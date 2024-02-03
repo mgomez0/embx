@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/styles.css" />
+    <title>{% block title %}{% endblock title %}</title>
+</head>
+
+<body>
+    <header>
+        <h1>vermillion</h1>
+    </header>
+    <main>
+        <nav>
+            <a href="">home</a>
+            <a href="">blog</a>
+            <a href="">contact</a>
+        </nav>
+        <section>
+            <h3>empowering a modern and seamless embedded development experience</h3>
+            <p> use the latest tools to iterate rapidly, test with confidence, and keep developers happy.</p>
+            {% block body_content %}{% endblock %}
+        </section>
+    </main>
+    <footer>
+        <p>
+            copyright 2024, Author:Michael Gomez
+        </p>
+    </footer>
+</body>
+
+</html>
