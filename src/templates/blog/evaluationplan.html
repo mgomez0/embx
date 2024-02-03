@@ -1,45 +1,19 @@
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <title>Document</title>
-    <link rel="stylesheet" href="../style/styles.css">
-</head>
-
-<body>
-
-    <header>
-        <h1>vermillion</h1>
-
-        <nav>
-            <a href="">home</a>
-            <a href="">blog</a>
-            <a href="">contact</a>
-        </nav>
-    </header>
-    <main>
-        <section>
-            <h2>empowering a modern and seamless embedded development experience</h2>
-            <p> use the latest tools to iterate rapidly, test with confidence, and keep developers happy.</p>
-        </section>
-        <section>
-            <h4>1/27/2024</h4>
-            <p>I'm looking at a few different platforms to evalute Rust's capabilities</p>
-            <ul>
-                <li>Raspberry Pi 3</li>
-                <li>Raspberry Pi Pico W</li>
-                <li>nRF</li>
-                <li>ESP32</li>
-                <li>STM32</li>
-            </ul>
-            <p>I'm interested in evaluating a few layers of abstraction - bare-metal, RTIC, and Embassy. I'm
-                particularly interested in audio processing and distribution, as it relates to my day job, so maybe a
-                cheap mic and some speakers would make for good peripherals.</p>
-        </section>
-    </main>
-    <footer>
-        <p>copyright 2024, author: Michael Gomez</p>
-
-    </footer>
-</body>
+{% extends "layout.html" %}
+{% block title %}Blog{% endblock %}
+{% block body_content %}
+<section>
+    <h3>evaluation plan</h3>
+    <h4>1/27/2024</h4>
+    <p>I'm looking at a few different platforms to evalute Rust's capabilities</p>
+    <ul>
+        <li>Raspberry Pi 3</li>
+        <li>Raspberry Pi Pico W</li>
+        <li>nRF</li>
+        <li>ESP32</li>
+        <li>STM32</li>
+    </ul>
+    <p>I'm interested in evaluating a few layers of abstraction - bare-metal, RTIC, and Embassy. I'm
+        particularly interested in audio processing and distribution, as it relates to my day job, so maybe a
+        cheap mic and some speakers would make for good peripherals.</p>
+</section>
+{% endblock %}

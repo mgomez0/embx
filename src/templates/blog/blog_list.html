@@ -1,0 +1,16 @@
+{% extends "layout.html" %}
+
+{% block title %}
+Blog List
+{% endblock %}
+
+{% block body_content %}
+<section>
+    <ul>
+    {% for file in html_files %}
+    <li><a href="blog/{{ file }}">{{ file }}</a></li>
+    {% endfor %}
+    </ul>
+</section>
+{% endblock %}
+
