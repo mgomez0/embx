@@ -9,17 +9,23 @@ meta -
 <h3>how did I build this blog?</h3>
 <h4>2/2/2024</h4>
 <p>I'm certainly guilty of trying to spin up a custom CMS and blogging platform (and failing!) before stringing a single
-    sentence together that might people might find worth reading.. I decided to keep it dead simple this time, and use
+    sentence together that people might find worth reading. I decided to keep it dead simple this time, and use
     actix-web
     + tera
     for HTML templates. I went this route for a few reasons - I want to stick to Rust, I'm already more-or-less familiar
     with
-    the actix macro system, and I didn't want to waste time with worrying about a databse or complicated deployments.
+    the Actix macro system, and I didn't want to waste time with worrying about a databse or complicated deployments.
     One HTML page
     per blog post works perfectly for my use-case. The trickiest part was figuring out how to programmatically display
     the blog post titles. Hardcoding the file names into an array isn't my favorite solution, but for now it's fine.
 
-    As for deployment,
+    As for deployment, I'm not quite there yet. I'm looking at GitLab for just to test out the CI/CD, but haven't
+    decided
+    on domain or hosting yet. null beach.com is taken, null beach.io is available but expensive! So I'm going to take my time with
+    that part
+    and write about it in part two.
+
+    Here's the source: <a href="https://github.com/mgomez0/embdx">github</a>
 </p>
 
 {% endblock %}
