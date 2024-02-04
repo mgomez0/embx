@@ -14,7 +14,7 @@ async fn main() -> std::io::Result<()> {
             .service(routes::blog::blog_list)
             .service(routes::contact::contact)
     })
-    .bind("127.0.0.1:3000")?
+    .bind("0.0.0.0:3000")?
     .run()
     .await
 }
