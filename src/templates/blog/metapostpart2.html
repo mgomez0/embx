@@ -12,7 +12,15 @@
     tool flyctl ingested the contents of the Dockerfile and automatically
     configured the deployment. Insanely smooth experience - my deployment
     didn't require postgres or redis, but I imagine if your application includes those
-    dependencies it would still be dead simple. I picked up the domain on Squarespace,
-    pointed an A record at the fly.io generated IP, and just like that, my Rust app
-    on the web.</p>
+    dependencies it would still be super easy. Configuring continuous deployment via
+    Github Actions was a breeze. The fly.io documentation is pretty good, but the
+    maintainers acknowledge a few details might be out of date - in <code>fly.yml</code>,
+    <code>actions/checkout@v3</code> should be
+    <code>actions/checkout@v4</code>. I was also a bit confused by the process of generating
+    security certificates so I could use my own domain, but once I figured out I actually needed to
+    enter that flow, it was painless. I picked up the domain on Squarespace,
+    pointed an A record at the fly.io hosted IP, and just like that, my Rust app was live.
+</p>
+
+<p>Here's the source: <a href="https://github.com/mgomez0/embdx">github</a></p>
 {% endblock %}
