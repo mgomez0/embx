@@ -1,0 +1,18 @@
+{% extends "layout.html" %}
+{% block title %}metapost 2{% endblock %}
+{% block body_content %}
+<h3>how did I build this blog?</h3>
+<h4>2/4/2024</h4>
+<p>Deplyoment turned out to be an utter joy using Docker
+    and fly.io. Highly recommend this stack for containerized apps;
+    even for an embedded guy like me, getting on the web was a piece
+    of cake. I copy-pasted a dead simple Dockerfile for building
+    a Rust app from somewhere on Stack Overflow, tested the image/container locally,
+    then fly.io and their CLI
+    tool flyctl ingested the contents of the Dockerfile and automatically
+    configured the deployment. Insanely smooth experience - my deployment
+    didn't require postgres or redis, but I imagine if your application includes those
+    dependencies it would still be dead simple. I picked up the domain on Squarespace,
+    pointed an A record at the fly.io generated IP, and just like that, my Rust app
+    on the web.</p>
+{% endblock %}

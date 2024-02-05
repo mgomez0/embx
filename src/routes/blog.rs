@@ -8,6 +8,7 @@ pub async fn blog_list(tera: web::Data<Tera>) -> impl Responder {
         "day1.html",
         "evaluation_plan.html",
         "metapost.html", /* add more files as needed */
+        "metapostpart2.html",
         "picoblinky.html",
     ];
 
