@@ -8,45 +8,49 @@
         development experience, and it leaves so much wanting. There are several notable roadblocks to making
         changes:</p>
     <ul>
-        <li>Vendor lock is a serious problem. proprietary tools restricted and licensed by chipmakers inevitably
-            fall behind the quality of opensource parallels.</li>
+        <li>Vendor lock is a serious problem. Committing to a particular chip manufacturer and their proprietary toolchain
+            has pros and cons, but when it comes to developer experience, closed-source toolchains are invariably
+            worse than their open-source equivalents. Just let me use neovim like a sane person, why do I have to use your awful
+            Eclipse clone and manage tons of IDE-specific artifacts just to build? Maybe I'm evangelizing a bit,
+            but leveraging open source will grant your developers maximum flexibility to use the tools they are most
+            familiar with, regardless of the platform.
+        </li>
         <li>Embedded developers are notoriously resistant to change, scoffing at QoL improvements as passing
             fads. Some of them are. But this mentality limits more than it protects, in my opinion.</li>
         <li>The embedded development community is relatively small, fragmented, and "offline" - in comparison to
             our web/mobile/SaaS counterparts. The fact is that as the demand for pure software application
             development increases, pay will skew towards those jobs and skillsets, so less developers will enter
             the embedded workforce. Less young blood, less innovation, more comfortable greybeards writing C in
-            notepad++.
-            It's a chicken-and-egg problem - embedded development requires patience, a willingness to overlook
+            vi until they retire. There's nothing wrong with that - but we can do better!
+            It's a chicken-and-egg problem - embedded development requires patience, a special willingness to overlook
             ergonomics for the sake of getting things done. Many try it, and leave for a higher paycheck which
             requires far less initial effort.
         </li>
     </ul>
-    <p>There are some companies that seem to be leading the charge in this space</p>
+    <p>There seems to be a good pretty opportunity in this space. There's a few companies that are trying their hand at
+    modernization. </p>
     <ul>
-        <li>memfault</li>
+        <li>Memfault</li>
         <p>very interesting platform that emphasizes observability for IoT fleets. I gave it a cursory
             whirl - the UI is sleek, with lots of options. Administering a fleet of internet-connected
             devices through this UI looks like a pleasurable experience, and could deliver a ton of
             value to both
             technical and non-technical staff. They seem to have a pretty solid engineering staff and
             their blog is topnotch. Maybe I'll go work for them if this whole thing falls apart.</p>
-        <li>dojofive(?)</li>
+        <li>Dojofive<li>
         <p> This is a small company based out of St. Paul, Minnesota, that purports to offer a similar
-            modernization of development practices, but in the form of a full-blown consultancy. I'm not
-            sure this is the way to do it right off the bat - I'd rather dive deep into exactly one
-            thing and
-            do that one thing extremely well. </p>
-        <li>????</li>
-        <p>There's a host of opensource frameworks like zephyr and platformio that are trying to move things in
+            modernization of development practices, but in the form of a full-blown consultancy.
+        </p>
+        <li>Open Source</li>
+        <p>There's a host of open-source frameworks like zephyr and platformio that are trying to move things in
             the right direction - but even these platforms are slow to be adopted.</p>
     </ul>
-    <p>My goal is to evaluate the most popular chip architectures with a series of increasingly complex rust
+    <p>My goal is to evaluate popular chip architectures with a series of increasingly complex Rust firmware
         projects until I settle on something worth pursuing to fabrication. Along the way, I plan to document my
         findings,
-        and bring modern software development practices as much as possible - Docker to isolate dependencies and
-        provide an easily distributable development environment, (my flavor of) test-driven development, CI/CD,
-        source control. If, along the way, I identify a gap in Rust support that requires opensource
+        and bring modern software development practices into the fold as much as possible - Docker to isolate dependencies and
+        provide an easily distributable build environment, (my flavor of) test-driven development, CI/CD,
+        source control, etc. If, along the way, I identify a gap in Rust support that requires open source
         contribution,
         I'd be thrilled to attempt to fill that gap as a method of gaining credibility in the community and
         contributing back to a language that genuinely think is the future of all systems computing </p>
