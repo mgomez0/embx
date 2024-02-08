@@ -11,6 +11,6 @@ COPY . .
 RUN cargo build --release
 
 # Specify the command to run on container start
-CMD ["./target/release/nullbeach"]
+CMD ["./target/release/kainosdx"]
 
 EXPOSE 3000
