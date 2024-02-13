@@ -10,6 +10,7 @@ pub async fn blog_list(tera: web::Data<Tera>) -> impl Responder {
         "metapost.html", /* add more files as needed */
         "metapostpart2.html",
         "picoblinky.html",
+        "developmentenvironment.html",
     ];
 
     //strip the .html extension and underscores

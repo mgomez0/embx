@@ -1,0 +1,33 @@
+{% extends "layout.html" %}
+{% block title %}
+development environment
+{% endblock %}
+{% block body_content %}
+<section>
+    <h3>how I write code</h3>
+    <h4>2/11/2024</h4>
+    <div class="postBody">
+        <p>I want to pause and give some details on my terminal + editor setup. Persuading the reader that
+            working from inside the terminal generates maximum developer efficiency is not in the scope of this
+            writing, but it is what works best for me personally. This includes some key tools:
+        <ul>
+            <li>iterm2</li>
+            <li>zsh</li>
+            <li>oh-my-zsh</li>
+            <li>neovim</li>
+            <li>tmux</li>
+            <li>ripgrep</li>
+            <li>fzf</li>
+        </ul>
+        </p>
+        <p> <a href="github.com/mgomez0">dotfiles can be found here</a></p>
+        <p>tmux session management is incredibly useful. I usually open a session per project
+            (for example, this blog, and my next embedded project), and I'm able to quickly switch between them.
+            Since each session maintains tab groups, it's easy to keep logical sense of shell instances. Seamless
+            navigation between tmux panes and vim splits is an added bonus. This feature essentially converts your
+            terminal into a full-fledged IDE. </p>
+    </div>
+
+
+</section>
+{% endblock %}
