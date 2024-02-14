@@ -11,7 +11,6 @@ development environment
             working from inside the terminal generates maximum developer efficiency is not in the scope of this
             writing, but it is what works best for me personally. This includes some key tools:
         <ul>
-            <li>iterm2</li>
             <li>zsh</li>
             <li>oh-my-zsh</li>
             <li>neovim</li>
@@ -20,12 +19,33 @@ development environment
             <li>fzf</li>
         </ul>
         </p>
-        <p> <a href="github.com/mgomez0">dotfiles can be found here</a></p>
-        <p>tmux session management is incredibly useful. I usually open a session per project
-            (for example, this blog, and my next embedded project), and I'm able to quickly switch between them.
-            Since each session maintains tab groups, it's easy to keep logical sense of shell instances. Seamless
-            navigation between tmux panes and vim splits is an added bonus. This feature essentially converts your
-            terminal into a full-fledged IDE. </p>
+        <p> <a href="https://github.com/mgomez0">dotfiles can be found here</a></p>
+        <div class="imageWithTextContainer">
+            <div class="imageBlock"><img src="/assets/terminal.jpg" alt="tmux session" style="border-radius:0.5rem;max-width:100%;height:auto"></div>
+            <div class="textBlock">
+                <section class="caption">
+            <p>tmux session management is incredibly useful. I usually open a session per project
+            (for example, this blog and my current embedded project), and I'm able to quickly switch between them.
+            Since each session maintains a group of windows, it's easy to keep logical sense of shell instances. Seamless
+            navigation between tmux panes and vim splits is an added bonus. The terminal is now my IDE.</p>
+            </div>
+</section>
+        </div>
+        <p>I prefer oh-my-zsh to manage my zsh plugins and themes. There's a few I specifically can't live without -
+            <ul>
+                <li>powerlevel10k</li>
+                <li>zsh-auto-suggestions</li>
+                <li>git</li>
+                <li>fzf</li>
+            </ul>
+            In combination, these give me a slick looking terminal that's easy to navigate and gives me a lot information at a quick glance.
+            Installation and configuration of these plugins is well-documented - just add them to the appropriate section in your <code>.zshrc</code>
+            after installing oh-my-zsh. Try out &lt;C-t&gt; and &lt;C-r&gt; - directory navigation and command history search is insanely fast.
+        </p>
+
+        My neovim setup is a bit more involved. The key plugins are coc.nvim (I use it for LSP), telescope, treesitter, and fzf.
+        This gives me blazing fast string searching across both filenames and contents, jump-to-definition, list of references, beautiful syntax
+        highlighting, and more.
     </div>
 
 

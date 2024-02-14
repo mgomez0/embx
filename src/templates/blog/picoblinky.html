@@ -7,21 +7,23 @@ picoblinky
     <h3>a rusty, blinking pico</h3>
     <h4>2/3/2024</h4>
     <div class="imageWithTextContainer">
-    <div class="imageBlock"><img src="/assets/blinky.jpeg" alt="blinky" width="500" height="300"></div>
+    <div class="imageBlock"><img src="/assets/blinky.jpeg" alt="blinky" style="border-radius:0.5rem;max-width:100%;height:auto;"></div>
     <div class="textBlock">
+        <section class="caption">
+    <p>After getting the picoprobe set up, I was able to flash the blinky example to my Pico W. Keep in mind the Pico W
+    onboard LED is no longer connected - I picked a different GPIO and wired a LED and resistor in series to it.  Blinky is
+    always a satisfying place to start.
+    </p>
+    </section>
+    </div>
+
+    </div>
+
     <p>I had a pleasant experience getting up and running with my Pico W. Since I'm doing
     all my development on a M2 MacBook Air, I decided to pursue the picoprobe configuration, where one
     Pico is actually used to flash and debug the other. The fantastic <a href="https://www.raspberrypi.org/documentation/">documentation</a>
      addresses this in detail ("Getting Started With Raspberry Pi Pico", Appendix A), so I won't rehash that writing.
     </p>
-    <p>After getting the picoprobe set up, I was able to flash the blinky example to my Pico W. Keep in mind the Pico W
-    onboard LED is no longer connected - I picked a different GPIO and wired a LED and resistor in series to it.  Blinky is
-    always a satisfying place to start.
-    </p>
-    </div>
-
-    </div>
-
     <p><a href="https://github.com/rp-rs/rp2040-project-template">A template to get started quickly - the below example can be found here</a></p>
     <div class="codeBox">
     <pre>
