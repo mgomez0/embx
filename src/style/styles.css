@@ -97,6 +97,12 @@ img {
     .imageWithTextContainer {
         flex-direction: column;
     }
+
+    body {
+        /* Different margin for phone width */
+        margin-left: 20px;
+        margin-right: 20px;
+    }
 }
 
 pre {
