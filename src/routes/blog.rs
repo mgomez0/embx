@@ -5,18 +5,18 @@ use tera::Tera;
 pub async fn blog_list(tera: web::Data<Tera>) -> impl Responder {
     // Read the file containing blog post titles
     let html_files = vec![
-        "day1.html",
+        "day_1.html",
         "evaluation_plan.html",
         "metapost.html", /* add more files as needed */
-        "metapostpart2.html",
-        "picoblinky.html",
-        "developmentenvironment.html",
+        "metapost_part2.html",
+        "blinky.html",
+        "development_environment.html",
     ];
 
     //strip the .html extension and underscores
     let html_files = html_files
         .iter()
-        .map(|x| x.replace("_", "").replace(".html", ""))
+        .map(|x| x.replace("_", " ").replace(".html", ""))
         .collect::<Vec<String>>();
 
     // Create a context with the list of blog posts
@@ -34,8 +34,11 @@ pub async fn blog(req: HttpRequest, tera: web::Data<Tera>) -> impl Responder {
     // Extract the blog post slug from the request
     let slug = req.match_info().get("slug").unwrap_or("unknown");
 
+    // Replace spaces with underscores in the slug
+    let slug_with_underscores = slug.replace(" ", "_");
+
     // Render the blog post template using Tera
-    let template_name = format!("blog/{}.html", slug);
+    let template_name = format!("blog/{}.html", slug_with_underscores);
     let context = tera::Context::new();
     let rendered = tera
         .render(&template_name, &context)
