@@ -886,16 +886,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "kainosdx"
-version = "0.1.0"
-dependencies = [
- "actix-files",
- "actix-web",
- "env_logger",
- "tera",
-]
-
-[[package]]
 name = "language-tags"
 version = "0.3.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -993,6 +983,16 @@ dependencies = [
  "log",
  "wasi",
  "windows-sys 0.48.0",
+]
+
+[[package]]
+name = "nullbeach"
+version = "0.1.0"
+dependencies = [
+ "actix-files",
+ "actix-web",
+ "env_logger",
+ "tera",
 ]
 
 [[package]]

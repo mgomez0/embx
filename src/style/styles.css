@@ -84,7 +84,8 @@ img {
 }
 
 /* Responsive styles */
-@media (max-width: 768px) {
+/* Stack image and text box in textWithImageContainer */
+@media (max-width: 1024px) {
 
     .textBlock,
     .imageBlock {
@@ -99,7 +100,6 @@ img {
     }
 
     body {
-        /* Different margin for phone width */
         margin-left: 20px;
         margin-right: 20px;
     }
