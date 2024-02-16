@@ -105,7 +105,19 @@ img {
     }
 }
 
+
 pre {
     margin: 0;
     background: #282a36;
+}
+
+header {
+    display: flex;
+    align-items: flex-end;
+    margin-bottom: 1rem;
+}
+
+
+.welcomeBanner {
+    margin: 0;
 }
