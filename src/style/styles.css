@@ -105,6 +105,14 @@ img {
     }
 }
 
+/* shrink header text on mobile */
+@media (max-width: 600px) {
+    header {
+        font-size: 0.7rem;
+    }
+}
+
+
 
 pre {
     margin: 0;
