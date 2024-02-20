@@ -1,0 +1,189 @@
+{% extends "layout.html" %} {% block title %} picoblinky {% endblock %} {% block
+body_content %}
+<section>
+  <h3>things are getting pretty serious</h3>
+  <h4>2/18/2024</h4>
+  <div class="imageWithTextContainer">
+    <div class="imageBlock">
+      <img
+        src="/assets/accelerometer.jpg"
+        style="border-radius: 0.5rem; max-width: 100%; height: auto"
+      />
+    </div>
+    <div class="textBlock">
+      <section class="caption">
+        Data readout from a MPU6050 onto an OLED SSD1306 display, both driven by
+        I2C from the Pico W. The MPU6050 is a 6-axis gyroscope and
+        accelerometer.
+      </section>
+    </div>
+  </div>
+
+  <p>
+    I completed another small project, which prompted me to reflect on a few
+    aspects of writing bare-metal firmware in Rust. This is going to be a
+    multi-part post, as I do a deep dive into several topics -
+  </p>
+
+  <ul>
+    <li>writing to flash memory and probe.rs</li>
+    <li>abstractions like the embedded-hal and BSP</li>
+    <li>RTT and logging</li>
+    <li>
+      the final project implementation and incorporating drivers from other
+      crates
+    </li>
+  </ul>
+
+  <h3>flashing a program</h3>
+  <p>
+    Leveraging a project template from
+    <a href="https://github.com/rp-rs/rp2040-project-template"> rp-rs </a>
+    made flashing programs as simple as
+    <code>cargo run --release</code>. I want to go into how this works. From
+    <a href="https://probe.rs"> probe.rs</a>:
+  </p>
+
+  <blockquote>
+    <i>
+      probe-rs is a library that implements the protocols of debug probes from
+      various manufacturers and the protocols of different chip architectures.
+      It furthermore is able to flash many targets and download software onto
+      them. While probe-rs was originally targeted at the Rust community, it can
+      freely be used for programming in C as well.
+    </i>
+  </blockquote>
+
+  <p>
+    Fantastic.
+    <a href="https://opencollective.com/probe-rs"> Go support this project. </a>
+  </p>
+  <p>
+    Let's try to get down to first principles. A good place to start is
+    understanding our target architecture, and how the Pico's memory is laid
+    out.
+    <a
+      href="https://datasheets.raspberrypi.org/pico/raspberry-pi-pico-datasheet.pdf"
+    >
+      Hello, datasheet.
+    </a>
+
+    The RP2040 is a dual-core ARM Cortex-M0+ processor. It has 264KB of SRAM,
+    and 2MB of flash memory. Since we are developing our code on MacOS, we need
+    to use a <i>cross-compiler</i> to generate code that can run on the Pico. In
+    this case, we need the <code>arm-none-eabi</code> toolchain.
+    <code>arm-none-eabi</code> is a <i>target specifier</i>. Arm is the target
+    architecture, 'none' shows that the compiler is not targeting a specific
+    operating system, and 'eabi' stands for the
+    <i>embedded application binary interface</i>. After installing the
+    toolchain, specify the build target in <code>config.toml</code> at the root
+    of your project - for the Pico, <code>thumbv6-none-eabi</code>.
+  </p>
+
+  <p>
+    Let's take a look at this program's <i>linker script</i> -
+    <code>memory.x</code> tells the linker how to lay out the program in memory.
+  </p>
+  <div class="codeBox">
+    <pre><code>MEMORY {
+BOOT2 : ORIGIN = 0x10000000, LENGTH = 0x100
+FLASH : ORIGIN = 0x10000100, LENGTH = 2048K - 0x100
+RAM   : ORIGIN = 0x20000000, LENGTH = 256K
+}
+
+EXTERN(BOOT2_FIRMWARE)
+
+SECTIONS {
+    /* ### Boot loader */
+    .boot2 ORIGIN(BOOT2) :
+    {
+        KEEP(*(.boot2));
+    } > BOOT2
+} INSERT BEFORE .text;</code></pre>
+  </div>
+  <p>
+    let's see if this matches up with what the datasheet says about memory
+    layout:
+  </p>
+
+  <blockquote>
+    External Flash is accessed via the QSPI interface using the execute-in-place
+    (XIP) hardware. This allows an external flash memory to be addressed and
+    accessed by the system as though it were internal memory. Bus reads to a
+    <b>16MB memory window starting at 0x10000000</b> are translated into a
+    serial flash transfer, and the result is returned to the master that
+    initiated the read.
+  </blockquote>
+
+  <p>
+    Lot going on in there, but the point is that the flash memory starts at
+    address 0x10000000. The linker script reflects this - and the second-stage
+    bootloader is placed at the beginning of flash memory, before our program
+    code .text section. Check out EXTERN(BOOT2_FIRMWARE) - in our case, the Pico
+    BSP supplies this symbol, which in turn grabs it from the rp2040_boot2
+    crate. I went and grabbed the definition for us to look at:
+  </p>
+
+  <div class="codeBox">
+    <pre><code>/// The linker will place this boot block at the start of our program image. We
+/// need this to help the ROM bootloader get our code up and running.
+#[cfg(feature = "boot2")]
+#[link_section = ".boot2"]
+#[no_mangle]
+#[used]
+pub static BOOT2_FIRMWARE: [u8; 256] = rp2040_boot2::BOOT_LOADER_W25Q080;
+</code></pre>
+  </div>
+
+  <p>The second-stage bootloader is exactly 256 bytes - 0x100.</p>
+  <p>
+    Since I'm using another Pico as a debugger, I'm programming the target via
+    ARM's SWD. probe.rs implements SWD, so we are in luck. Here's
+    <code>config.toml</code>
+  </p>
+
+  <div class="codeBox">
+    <pre><code>[target.'cfg(all(target_arch = "arm", target_os = "none"))']
+# Choose a default "cargo run" tool (see README for more info)
+# - `probe-rs` provides flashing and defmt via a hardware debugger, and stack unwind on panic
+# - elf2uf2-rs loads firmware over USB when the rp2040 is in boot mode
+runner = "probe-rs run --chip RP2040 --protocol swd"
+# runner = "elf2uf2-rs -d"
+
+rustflags = [
+  "-C", "linker=flip-link",
+  "-C", "link-arg=--nmagic",
+  "-C", "link-arg=-Tlink.x",
+  "-C", "link-arg=-Tdefmt.x",
+
+  # Code-size optimizations.
+  #   trap unreachable can save a lot of space, but requires nightly compiler.
+  #   uncomment the next line if you wish to enable it
+  # "-Z", "trap-unreachable=no",
+  "-C", "inline-threshold=5",
+  "-C", "no-vectorize-loops",
+]
+
+[build]
+target = "thumbv6m-none-eabi"
+
+[env]
+DEFMT_LOG = "debug"
+</code></pre>
+  </div>
+  <p>
+    The "runner" field tells cargo to run the code with probe-rs, which handles
+    the magic of detecting our target device via SWD and flashing the program. A
+    much better experience than GDB and OpenOCD, for my industry veterans! This
+    summarizes how <code>cargo run</code> is configured to flash the Pico.
+  </p>
+  <p>
+    That's about it for programming the target. One topic of extreme importance
+    to embedded programmers - code size. Rust binaries can be pretty big, even
+    #[no_std]. I'll address the topic, along with strategies to reduce binary
+    size, at a later date.
+  </p>
+  <p>Coming soon: embedded-hal and BSP crates!</p>
+</section>
+
+{% endblock %}

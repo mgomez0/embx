@@ -11,6 +11,7 @@ pub async fn blog_list(tera: web::Data<Tera>) -> impl Responder {
         "metapost_part2.html",
         "blinky.html",
         "development_environment.html",
+        "getting_serious.html",
     ];
 
     //strip the .html extension and underscores
