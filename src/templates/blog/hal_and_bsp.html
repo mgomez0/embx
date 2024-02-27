@@ -1,0 +1,266 @@
+{% extends "layout.html" %} {% block title %} HAL and BSP {% endblock %} {%
+block body_content %}
+<h3>hal, bsp, proc macros, and trait bounds</h3>
+<h4>2/2/2024</h4>
+<h5>&#x1F480;WARNING: LOTS OF CODE AHEAD&#x1F480;</h5>
+<p>
+    <b>
+        tldr; here's the
+        <a href="https://github.com/mgomez0/nullbeach-accel-oled">source</a>
+    </b>
+</p>
+<p>
+    My firmware is leveraging some handy details - namely, the rp-hal and the
+    pico-bsp. The rp-hal implements a set of common traits defined by the
+    embedded-hal crate, a project run by the Rust Embedded Working Group aiming to
+    provide some standardization in the embedded Rust space. Since I'm using the
+    Raspberry Pi Pico W development board, I can use a board support pacakge that
+    sits on top of the rp-hal, and implements board specific details, such as
+    providing the appropriate second-stage bootloader that we looked at in the
+    previous post, and configure each pin of the RP2040 according to how it's
+    connected on the Pico board.
+</p>
+
+<p>To get an understanding of the underlying implementation, I'll try to work my way down the ladder: firmware ->
+    pico-bsp
+    -> rp2040_hal -> register level reads+writes</p>
+
+<p>Pin configuration seems like a great starting point. </p>
+<div class="codeBox">
+    <pre><code>//main.rs
+
+let pins = bsp::Pins::new(
+    pac.IO_BANK0,
+    pac.PADS_BANK0,
+    sio.gpio_bank0,
+    &mut pac.RESETS,
+);
+let mpu_scl_pin: Pin<_, FunctionI2C, PullUp> = pins.gpio27.reconfigure();
+let mpu_sda_pin: Pin<_, FunctionI2C, PullUp> = pins.gpio26.reconfigure();</code></pre>
+</div>
+
+<p>There's a lot of stuff happening in these few seemingly simple configuration lines, so let's drill down. First things
+    first, need to inspect the <code>Pin</code> type. </p>
+
+<div class="codeBox">
+    <pre><code>//rp2040-hal/src/gpio/mod.rs
+
+    /// Represents a pin, with a given ID (e.g. Gpio3), a given function (e.g. FunctionUart) and a given pull type
+/// (e.g. pull-down).
+pub struct Pin<I: PinId, F: func::Function, P: PullType> {
+    id: I,
+    function: F,
+    pull_type: P,
+}</code></pre>
+</div>
+<p>Ok, doesn't look too bad so far. What if we try to look at the
+    <code>pins</code> struct that contains the particular GPIO we are trying to configure?
+</p>
+
+<p>The below macro...</p>
+
+<div="codeBox">
+    <pre><code>rp2040_hal/src/gpio/mod.rs
+
+#[macro_export]
+macro_rules! bsp_pins {
+    (
+        $(
+            $( #[$id_cfg:meta] )*
+            $Id:ident {
+                $( #[$name_doc:meta] )*
+                name: $name:ident $(,)?
+                $(
+                    aliases: {
+                        $(
+                            $( #[$alias_cfg:meta] )*
+                            $Function:ty, $PullType:ident: $Alias:ident
+                        ),+
+                    }
+                )?
+            } $(,)?
+        )+
+    )
+</code></pre>
+    </div>
+
+    <p>Populates the <code>Pins</code> struct, programmatically - using <code>paste</code></p>
+    <div class="codeBox">
+        <pre><code>rp2040_hal/src/gpio/mod.rs
+
+$crate::paste::paste! {
+    pub struct Pins {
+        $(
+            $( #[$id_cfg] )*
+            $( #[$name_doc] )*
+            pub $name: $crate::gpio::Pin<
+                $crate::gpio::bank0::$Id,
+                <$crate::gpio::bank0::$Id as $crate::gpio::DefaultTypeState>::Function,
+                <$crate::gpio::bank0::$Id as $crate::gpio::DefaultTypeState>::PullType,
+            >,
+        )+
+    }
+            </code></pre>
+    </div>
+    <p>There's an excellent comment that precedes the <code>bsp_pins</code> definition that explains the translation of
+        the macro
+        input to source code, and how it sets up the <code>Pins</code> struct. It's too long to include here, so go
+        take a look. </p>
+
+    <p>The below code lives in the BSP - and is the input to the <code>bsp_pins</code> macro. This makes it much more
+        ergonomic to define
+        a large set of pins, as well as automtically generate doc-strings for each one. </p>
+
+    <div class="codeBox">
+        <pre><code>rp-pico/src/lib.rs
+
+/// GPIO 26 supports following functions:
+///
+/// | Function     | Alias with applied function |
+/// |--------------|-----------------------------|
+/// | `SPI1 SCK`   | [crate::Gp26Spi1Sck]        |
+/// | `UART1 CTS`  | [crate::Gp26Uart1Cts]       |
+/// | `I2C1 SDA`   | [crate::Gp26I2C1Sda]        |
+/// | `PWM5 A`     | [crate::Gp26Pwm5A]          |
+/// | `PIO0`       | [crate::Gp26Pio0]           |
+/// | `PIO1`       | [crate::Gp26Pio1]           |
+Gpio26 {
+    name: gpio26,
+    aliases: {
+        /// UART Function alias for pin [crate::Pins::gpio26]
+        FunctionUart, PullNone: Gp26Uart1Cts,
+        /// SPI Function alias for pin [crate::Pins::gpio26]
+       FunctionSpi, PullNone: Gp26Spi1Sck,
+        /// I2C Function alias for pin [crate::Pins::gpio26]
+        FunctionI2C, PullUp: Gp26I2C1Sda,
+        /// PWM Function alias for pin [crate::Pins::gpio26]
+        FunctionPwm, PullNone: Gp26Pwm5A,
+        /// PIO0 Function alias for pin [crate::Pins::gpio26]
+        FunctionPio0, PullNone: Gp26Pio0,
+        /// PIO1 Function alias for pin [crate::Pins::gpio26]
+        FunctionPio1, PullNone: Gp26Pio1
+    }
+}
+</code></pre>
+    </div>
+
+    <p> Rust macros look a little crazy. I started to write an explanation of the syntax, and quickly realized the
+        authors of <a href="https://doc.rust-lang.org/book/ch19-06-macros.html?highlight=Macros#macros">"The Book"</a>
+        do
+        a far better job than I could ever hope to do. Read it for an explanation of the pattern-matching syntax and
+        what + and * do.</p>
+
+    <p>Finally, let's look at <code>reconfigure</code></p>
+    <div class="codeBox">
+        <pre><code>//rp2040-hal/src/gpio/mod.rs
+
+/// Convert the pin from one state to the other.
+pub fn reconfigure&lt;F2, P2&gt;(self) -> Pin&lt;I, F2, P2&gt;
+where
+    F2: func::Function,
+    P2: PullType,
+    I: func::ValidFunction&lt;F2&gt;,
+{
+    self.into_function().into_pull_type()
+}
+
+// bringing in the call from main
+let mpu_scl_pin: Pin&lt;_, FunctionI2C, PullUp&gt; = pins.gpio27.reconfigure();
+    </code></pre>
+    </div>
+
+    <p>I can smell registers. But let's talk about what this function does, because it's actually quite interesting. It
+        takes self as a parameter,
+        meaning the object calling the method - in this case, <code>pins.gpio27</code>. The signature is followed by a
+        <code>where</code> clause which represents, in Rust terms,
+        <i>trait bounds</i>. If you've experimented with the language at any length, you've run into that error message
+        <code>could not satisfy trait bounds</code> and likely cursed the borrow-checker.
+        It's a pretty brilliant feature that makes types even more expressive, since the function cannot be called
+        unless the trait bounds are satisfied. In this case, <code>F2</code> must implement the
+        <code>func::Function</code> trait,
+        <code>P2</code> must implement <code>PullType</code>, and
+        <code>I</code> is a <code>PinID</code> (bank, pin number) where <code>F2</code> is a <code>ValidFunction</code>.
+        This ensures that you cannot assign the I2C
+        function to a pin that doesn't support I2C as a <code>ValidFunction</code> - and the policy is enforced at
+        compile time. This
+        is such a handy concept for being sure that you've configured pins correctly.
+        The result of <code>reconfigure</code> is assigned to our <code>Pin&lt;_,FunctionI2C, PullUp&gt</code>, and we
+        are now ready
+        to use this pin
+        as a SCL line for our MPU6050.
+    </p>
+
+    <p>And now, the moment of truth</p>
+
+    <div class="codeBox">
+        <pre><code>// main.rs
+pub fn into_function<F2>(self) -> Pin<I, F2, P>
+where
+    F2: func::Function,
+    I: func::ValidFunction<F2>,
+{
+    // Thanks to type-level validation, we know F2 is valid for I
+    let prev_function = self.function.as_dyn();
+    let function = F2::from(prev_function);
+    let new_function = function.as_dyn();
+
+    if prev_function != new_function {
+        pin::set_function(&self.id, new_function);
+    }
+
+    Pin {
+        function,
+        id: self.id,
+        pull_type: self.pull_type,
+    }
+}
+
+pub(crate) fn set_function<P: PinId>(pin: &P, function: DynFunction) {
+    use crate::pac::io_bank0::gpio::gpio_ctrl::FUNCSEL_A;
+    let funcsel = match function {
+        DynFunction::Xip => FUNCSEL_A::JTAG,
+        DynFunction::Spi => FUNCSEL_A::SPI,
+        DynFunction::Uart => FUNCSEL_A::UART,
+        DynFunction::I2c => FUNCSEL_A::I2C,
+        DynFunction::Pwm => FUNCSEL_A::PWM,
+        DynFunction::Sio(sio) => {
+            let mask = pin.mask();
+            match sio {
+                crate::gpio::DynSioConfig::Input => {
+                    pin.sio_oe_clr().write(|w| unsafe { w.bits(mask) });
+                }
+                crate::gpio::DynSioConfig::Output => {
+                    pin.sio_oe_set().write(|w| unsafe { w.bits(mask) });
+                }
+            }
+
+            FUNCSEL_A::SIO
+        }
+        DynFunction::Pio0 => FUNCSEL_A::PIO0,
+        DynFunction::Pio1 => FUNCSEL_A::PIO1,
+        DynFunction::Clock => FUNCSEL_A::CLOCK,
+        DynFunction::Usb => FUNCSEL_A::USB,
+        DynFunction::Null => FUNCSEL_A::NULL,
+    };
+
+    pin.io_ctrl().modify(|_, w| w.funcsel().variant(funcsel));
+}
+</code></pre>
+    </div>
+
+    <p>To summarize - the <code>into_function</code> is called on the Pin - if the <code>Function</code> has changed, we
+        call <code>set_function</code>,
+        which accepts a reference to the pin ID in question and the new pin function, uses
+        a match expression to map the input <code>DynFunction</code> to a <code>FUNCSEL_A</code> bitfield, and finally
+        writes that bitfield to the register to
+        effect the change.</p>
+
+    <p>That was a wild ride. I thought this post was going to be about HALs and BSP, but it also ended up being about
+        proc macros and trait
+        bounds. This was my first exposure to these types of macros and I had to stare at them for a while before I
+        understood what was going on. We were able to drill down into the BSP and HAL and see how seemingly magical
+        compile-time
+        rules for our hardware are actually implemented via trait bounds.
+    </p>
+    <p>Stay tuned as I dive into how RTT and logging works with probe-rs and the pico-probe next.</p>
+    {% endblock %}
